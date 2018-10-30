@@ -81,6 +81,24 @@ app.post('/products', function (req, res) {
   });
 });
 
+app.get("/baskets", function (req,res) {
+  const candidateId = req.headers["candidate-id"];
+
+  const params = {
+    ExpressionAttributeValues: { ":v" : candidateId },
+    FilterExpression: "candidateId = :v",
+    TableName: BASKETS_TABLE
+  };
+
+  dynamoDb.scan(params, (error, result) => {
+    if (error) {
+      res.status(400).json({error: "No workie"});
+    } else {
+      res.json({results: result.Items.map( item => ({basketId: item.basketId, basketItems: item.basketItems}))});
+    }
+  });
+});
+
 app.post("/baskets", function (req, res) {
   const candidateId = req.headers["candidate-id"];
   const basketId = uuid();
