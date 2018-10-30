@@ -15,7 +15,11 @@ app.get('/', function (req, res) {
 });
 
 app.get('/products', function (req, res) {
+  const candidateId = req.headers["candidate-id"];
+
   const params = {
+    ExpressionAttributeValues: { ":v" : candidateId },
+    FilterExpression: "candidateId = :v",
     TableName: PRODUCTS_TABLE
   };
 
@@ -29,20 +33,22 @@ app.get('/products', function (req, res) {
 });
 
 app.get('/products/:productId', function (req, res) {
+  const candidateId = req.headers["candidate-id"];
+
   const params = {
+    ExpressionAttributeValues: { ":p" : req.params.productId, ":c" : candidateId },
+    FilterExpression: "candidateId = :c",
     TableName: PRODUCTS_TABLE,
-    Key: {
-      productId: req.params.productId,
-    },
+    KeyConditionExpression: "productId = :p"
   };
 
-  dynamoDb.get(params, (error, result) => {
+  dynamoDb.query(params, (error, result) => {
     if (error) {
       console.log(error);
       res.status(400).json({error: "Invalid product ID"});
     }
-    if (result.Item) {
-      const {productId, name, price} = result.Item;
+    else if (result.Items) {
+      const {productId, name, price} = result.Items[0];
       res.json({ productId, name, price});
     } else {
       res.status(404).json({error: "Product not found"});
@@ -51,12 +57,14 @@ app.get('/products/:productId', function (req, res) {
 });
 
 app.post('/products', function (req, res) {
+  const candidateId = req.headers["candidate-id"];
   const {productId, name, price} = req.body;
 
   const params = {
     TableName: PRODUCTS_TABLE,
     Item: {
       productId: productId,
+      candidateId: candidateId,
       name: name,
       price: price
     },
