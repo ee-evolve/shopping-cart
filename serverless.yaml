@@ -2,6 +2,7 @@ service: shopping-cart-api
 
 custom:
   productTableName: 'products-${self:provider.stage}'
+  basketTableName: 'baskets-${self:provider.stage}'
 
 provider: 
   name: aws
@@ -20,8 +21,10 @@ provider:
         - dynamodb:DeleteItem
       Resource:
         - { "Fn::GetAtt": ["ProductsDynamoDBTable", "Arn" ] }
+        - { "Fn::GetAtt": ["BasketsDynamoDBTable", "Arn" ] }
   environment:
     PRODUCTS_TABLE: ${self:custom.productTableName}
+    BASKETS_TABLE: ${self:custom.basketTableName}
 
 
 functions:
@@ -48,3 +51,18 @@ resources:
           ReadCapacityUnits: 1
           WriteCapacityUnits: 1
         TableName: ${self:custom.productTableName}
+    BasketsDynamoDBTable:
+      Type: 'AWS::DynamoDB::Table'
+      Properties:
+        AttributeDefinitions:
+          -
+            AttributeName: basketId
+            AttributeType: S
+        KeySchema:
+          -
+            AttributeName: basketId
+            KeyType: HASH
+        ProvisionedThroughput:
+          ReadCapacityUnits: 1
+          WriteCapacityUnits: 1
+        TableName: ${self:custom.basketTableName}

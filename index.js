@@ -2,10 +2,12 @@ const serverless = require('serverless-http');
 const express = require('express');
 const bodyParser = require('body-parser');
 const AWS = require('aws-sdk');
+const uuid = require('uuid/v4');
 
 const app = express();
 
 const PRODUCTS_TABLE = process.env.PRODUCTS_TABLE;
+const BASKETS_TABLE = process.env.BASKETS_TABLE;
 const dynamoDb = new AWS.DynamoDB.DocumentClient();
 
 app.use(bodyParser.json({strict: false}));
@@ -77,6 +79,30 @@ app.post('/products', function (req, res) {
     }
     res.json({ productId, name, price});
   });
+});
+
+app.post("/baskets", function (req, res) {
+  const candidateId = req.headers["candidate-id"];
+  const basketId = uuid();
+
+  const params = {
+    TableName: BASKETS_TABLE,
+    Item: {
+      basketId: basketId,
+      candidateId: candidateId,
+      basketItems: []
+    }
+  }
+
+  dynamoDb.put(params, (error) => {
+    if(error) {
+      console.log(error);
+      res.status(400).json({ error: 'Cannot create basket'});
+    } else {
+      res.setHeader('Location', "/baskets/" + basketId);
+      res.status(201).json({location: "/baskets/" + basketId});
+    }
+  })
 });
 
 module.exports.handler = serverless(app);
