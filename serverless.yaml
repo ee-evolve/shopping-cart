@@ -1,0 +1,14 @@
+service: shopping-cart-api
+
+provider: 
+  name: aws
+  runtime: nodejs8.10
+  region: eu-west-1
+  profile: interview-api
+
+functions:
+  app:
+    handler: index.handler
+    events:
+      - http: ANY /
+      - http: 'ANY {proxy+}'

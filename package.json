@@ -1,0 +1,20 @@
+{
+  "name": "hackday",
+  "version": "1.0.0",
+  "description": "shopping cart",
+  "main": "index.js",
+  "scripts": {
+    "test": "test"
+  },
+  "keywords": [
+    "interview",
+    "api"
+  ],
+  "author": "equalexperts",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.16.4",
+    "serverless": "^1.32.0",
+    "serverless-http": "^1.8.0"
+  }
+}
