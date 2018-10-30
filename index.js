@@ -14,6 +14,20 @@ app.get('/', function (req, res) {
   res.send('Hello World!')
 });
 
+app.get('/products', function (req, res) {
+  const params = {
+    TableName: PRODUCTS_TABLE
+  };
+
+  dynamoDb.scan(params, (error, result) => {
+    if (error) {
+      res.status(400).json({error: "No workie"});
+    } else {
+      res.json({results: result.Items.map( item => ({productId: item.productId, name: item.name, price: item.price}))});
+    }
+  });
+});
+
 app.get('/products/:productId', function (req, res) {
   const params = {
     TableName: PRODUCTS_TABLE,
