@@ -4,7 +4,8 @@
   "description": "shopping cart",
   "main": "index.js",
   "scripts": {
-    "test": "test"
+    "test": "test",
+    "deploy": "sls deploy"
   },
   "keywords": [
     "interview",
