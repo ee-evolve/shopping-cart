@@ -1,10 +1,28 @@
 service: shopping-cart-api
 
+custom:
+  productTableName: 'products-${self:provider.stage}'
+
 provider: 
   name: aws
   runtime: nodejs8.10
+  stage: dev
   region: eu-west-1
   profile: interview-api
+  iamRoleStatements:
+    - Effect: Allow
+      Action:
+        - dynamodb:Query
+        - dynamodb:Scan
+        - dynamodb:GetItem
+        - dynamodb:PutItem
+        - dynamodb:UpdateItem
+        - dynamodb:DeleteItem
+      Resource:
+        - { "Fn::GetAtt": ["ProductsDynamoDBTable", "Arn" ] }
+  environment:
+    PRODUCTS_TABLE: ${self:custom.productTableName}
+
 
 functions:
   app:
@@ -12,3 +30,21 @@ functions:
     events:
       - http: ANY /
       - http: 'ANY {proxy+}'
+
+resources:
+  Resources:
+    ProductsDynamoDBTable:
+      Type: 'AWS::DynamoDB::Table'
+      Properties:
+        AttributeDefinitions:
+          -
+            AttributeName: productId
+            AttributeType: S
+        KeySchema:
+          -
+            AttributeName: productId
+            KeyType: HASH
+        ProvisionedThroughput:
+          ReadCapacityUnits: 1
+          WriteCapacityUnits: 1
+        TableName: ${self:custom.productTableName}
